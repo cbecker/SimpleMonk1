@@ -1,0 +1,4 @@
+[submodule "resources/fonts"]
+	path = resources/fonts
+	url = git@github.com:cbecker/m2font.git
+	branch = fix-fonts
