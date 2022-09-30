@@ -4,6 +4,8 @@ import Toybox.Lang;
 import Toybox.System;
 import Toybox.WatchUi;
 import Toybox.ActivityMonitor;
+import Toybox.Weather;
+
 using Toybox.System as Sys;
 
 class TextAndFont
@@ -114,6 +116,36 @@ class SimpleMonk1View extends WatchUi.WatchFace {
     		 new TextAndFont(monthName, gSmallFont, Graphics.COLOR_WHITE)]);
     }
     
+    function bearingdegreesToDirectionString(angle as Lang.Float or Null) as Lang.String {
+    	if (angle == null) { return "NA"; }
+    	var dirIndex = (angle.toFloat() / 45 + 0.5).toNumber();
+    	var dirStrings = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    	return dirStrings[dirIndex % dirStrings.size()];
+    }
+    
+    function drawWeather(x as Lang.Numeric, y as Lang.Numeric, dc as Dc) as Void {
+    	var curCond = Weather.getCurrentConditions();
+    	var tempText = "";
+    	var windText = "";
+    	var angleText = "";
+    	if (curCond != null) { 
+	    	if (curCond.temperature != null) {
+	    		tempText = (curCond.temperature + 0.5).toNumber().format("%d");
+	    	}
+	    	if (curCond.windSpeed != null) {
+	    		windText = (curCond.windSpeed * 3.6).format("%d");
+	    	}
+	    	angleText = bearingdegreesToDirectionString(curCond.windBearing);
+    	}
+    	
+    	drawTextCentered(x, y, dc,
+	    		    [new TextAndFont(tempText, gSmallNumbersFont, Graphics.COLOR_WHITE),
+	    		     new TextAndFont("% ", gSmallNumbersFont, Graphics.COLOR_WHITE),
+	    		     new TextAndFont(windText, gSmallNumbersFont, Graphics.COLOR_WHITE),
+	    		     new TextAndFont("|", gSmallFont, Graphics.COLOR_WHITE),
+	    		     new TextAndFont(angleText, gSmallFont, Graphics.COLOR_WHITE)]);
+    }
+    
     function drawBar(x as Lang.Numeric, y as Lang.Numeric, 
     			     barWidth as Lang.Numeric, barHeight as Lang.Numeric, 
     				 curValue as Lang.Numeric, maxValue as Lang.Numeric, dc as Dc) as Void {
@@ -148,6 +180,8 @@ class SimpleMonk1View extends WatchUi.WatchFace {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT); 
 
     	drawDate(dispWidth / 2, dispHeight * 0.17, dc);
+    	
+    	drawWeather(dispWidth/2, dispHeight * 0.25, dc);
 
 		self.drawTime(dispWidth / 2, dispHeight / 2, dc);
 		
